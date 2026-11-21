@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Calculadora CBS/IBS – Simples Nacional</title>
+<style>
+  :root {
+    --fundo: #f6f7f9; --cartao: #ffffff; --texto: #1d2733; --suave: #5b6675;
+    --borda: #e2e6eb; --destaque: #0f6e56; --destaque-claro: #e3f2ec; --aviso: #fff6e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #14181d; --cartao: #1c2229; --texto: #e7ebef; --suave: #9aa5b1;
+      --borda: #2c343d; --destaque: #4cc39a; --destaque-claro: #173229; --aviso: #3a3017;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fundo); color: var(--texto);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 48px 20px 64px; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 8px; }
+  h2 { font-size: 1.2rem; margin: 0 0 12px; }
+  p { margin: 0 0 12px; }
+  .subtitulo { color: var(--suave); margin-bottom: 28px; }
+  .cartao {
+    background: var(--cartao); border: 1px solid var(--borda); border-radius: 12px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .botao {
+    display: inline-block; background: var(--destaque); color: #fff; text-decoration: none;
+    padding: 12px 22px; border-radius: 8px; font-weight: 600; margin: 4px 0 8px;
+  }
+  @media (prefers-color-scheme: dark) { .botao { color: #0c1a14; } }
+  .botao:hover { filter: brightness(1.08); }
+  ol { padding-left: 22px; margin: 0; }
+  li { margin-bottom: 6px; }
+  code {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .9em;
+    background: var(--destaque-claro); padding: 1px 6px; border-radius: 4px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+  th { color: var(--suave); font-weight: 600; }
+  .aviso { background: var(--aviso); border-color: transparent; }
+  .rodape { color: var(--suave); font-size: .85rem; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Calculadora CBS/IBS – Simples Nacional</h1>
+  <p class="subtitulo">Calculadora oficial da Receita Federal para a Reforma Tributária do Consumo, disponível para uso interno da empresa.</p>
+
+  <section class="cartao">
+    <h2>Abrir a calculadora</h2>
+    <p>A calculadora abre numa página de serviços (Swagger), onde você preenche os dados da operação e recebe o cálculo.</p>
+    <a class="botao" href="/api/swagger-ui.html">Abrir calculadora</a>
+  </section>
+
+  <section class="cartao">
+    <h2>Como fazer um cálculo</h2>
+    <ol>
+      <li>Na calculadora, clique em <code>POST /calculadora/observabilidade/simples-nacional/nao-assistido</code>.</li>
+      <li>Clique em <strong>Try it out</strong>. Aparece um exemplo já preenchido.</li>
+      <li>Troque os valores pelos da sua operação (veja os campos abaixo).</li>
+      <li>Clique em <strong>Execute</strong> e veja o resultado logo abaixo, em <em>Response body</em>.</li>
+    </ol>
+  </section>
+
+  <section class="cartao">
+    <h2>O que é cada campo</h2>
+    <table>
+      <thead><tr><th>Campo</th><th>O que colocar</th></tr></thead>
+      <tbody>
+        <tr><td><code>data</code></td><td>Data da operação (ano-mês-dia). O cálculo vale para operações a partir de 2027.</td></tr>
+        <tr><td><code>tpDoc</code></td><td>Tipo de nota: <code>55</code> NF-e, <code>65</code> NFC-e.</td></tr>
+        <tr><td><code>CRT</code></td><td><code>1</code> Simples Nacional; <code>2</code> se a empresa excedeu o sublimite.</td></tr>
+        <tr><td><code>aliquotasEfetivas</code></td><td>Alíquotas efetivas de CBS (<code>pCBSSN</code>) e IBS (<code>pIBSSN</code>) do anexo da empresa, como publicadas no PGDAS.</td></tr>
+        <tr><td><code>fatorR</code></td><td>Só para a atividade 09: <code>true</code> se o fator R for 28% ou mais.</td></tr>
+        <tr><td><code>cAtivSN</code></td><td>Código da atividade do Simples. A lista está em <code>GET /calculadora/simples-nacional/atividades</code>.</td></tr>
+        <tr><td><code>cClassTrib</code></td><td>Classificação tributária do item. <code>000001</code> é a tributação normal.</td></tr>
+        <tr><td><code>baseCalculo</code></td><td>Valor do item: produto + frete + seguro + outros − desconto.</td></tr>
+        <tr><td><code>ncm</code> ou <code>nbs</code></td><td>Código do produto (NCM) ou do serviço (NBS), quando exigido.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="cartao">
+    <h2>Como ler o resultado</h2>
+    <p>Cada item volta com um <code>estadoItem</code>:</p>
+    <ol>
+      <li><code>CALCULADO</code>: deu certo; os valores de CBS e IBS estão no item.</li>
+      <li><code>INCONSISTENCIA_ENTRADA</code>: algum dado está errado; o campo <code>erros</code> explica qual.</li>
+      <li><code>NAO_CALCULADO</code>: a atividade não se aplica a esse tipo de nota.</li>
+    </ol>
+    <p style="margin-top:12px">O campo <code>total</code>, no fim, soma os itens calculados.</p>
+  </section>
+
+  <section class="cartao aviso">
+    <h2>Importante</h2>
+    <p>Esta calculadora não substitui o PGDAS-D: o imposto mensal do Simples (DAS) continua sendo apurado no Portal do Simples Nacional.</p>
+    <p>Para sair, feche o navegador. O login fica guardado enquanto ele estiver aberto.</p>
+  </section>
+
+  <p class="rodape">Código oficial: <a href="https://github.com/ReceitaFederal/calculadora-rtc-simples-nacional">ReceitaFederal/calculadora-rtc-simples-nacional</a> (licença MIT).</p>
+</main>
+</body>
+</html>

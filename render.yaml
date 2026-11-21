@@ -1,0 +1,16 @@
+# Configuração para o Render (Blueprint).
+# No painel do Render: New > Blueprint > escolha este repositório.
+services:
+  - type: web
+    name: calculadora-simples-nacional
+    runtime: docker
+    # starter = plano pago, sempre ligado. Troque por "free" para testar sem custo
+    # (o gratuito desliga após 15 minutos sem uso e demora para voltar).
+    plan: starter
+    healthCheckPath: /saude
+    envVars:
+      # Usuários e senhas de acesso. O Render pede o valor na criação;
+      # ele nunca fica salvo no repositório.
+      # Formato: usuario:senha,usuario2:senha2
+      - key: USUARIOS
+        sync: false

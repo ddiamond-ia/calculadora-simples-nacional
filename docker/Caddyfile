@@ -1,0 +1,34 @@
+{
+	# Sem painel administrativo e sem HTTPS próprio: o Render já entrega o HTTPS.
+	admin off
+	auto_https off
+}
+
+:{$PORT:10000} {
+	# Verificação de saúde usada pelo Render (única rota sem login).
+	handle /saude {
+		rewrite * /api/versao
+		reverse_proxy 127.0.0.1:8082
+	}
+
+	handle {
+		# Login: usuários e senhas vêm da variável USUARIOS (ver iniciar.sh).
+		basic_auth {
+			import /tmp/usuarios.caddy
+		}
+
+		# Página inicial da empresa.
+		@inicio path / /index.html
+		handle @inicio {
+			root * /srv/site
+			file_server
+		}
+
+		# Todo o resto vai para a calculadora da Receita.
+		handle {
+			reverse_proxy 127.0.0.1:8082 {
+				header_up X-Forwarded-Proto {$PROTOCOLO_EXTERNO:https}
+			}
+		}
+	}
+}
