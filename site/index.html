@@ -55,13 +55,19 @@
   <p class="subtitulo">Calculadora oficial da Receita Federal para a Reforma Tributária do Consumo, disponível para uso interno da empresa.</p>
 
   <section class="cartao">
-    <h2>Abrir a calculadora</h2>
-    <p>A calculadora abre numa página de serviços (Swagger), onde você preenche os dados da operação e recebe o cálculo.</p>
-    <a class="botao" href="/api/swagger-ui.html">Abrir calculadora</a>
+    <h2>Calcular uma nota</h2>
+    <p>Preencha o formulário com o valor dos itens, a atividade e as alíquotas do PGDAS, e veja a CBS e o IBS na hora.</p>
+    <a class="botao" href="/calcular.html">Calcular agora</a>
   </section>
 
   <section class="cartao">
-    <h2>Como fazer um cálculo</h2>
+    <h2>Modo avançado</h2>
+    <p>Para casos que o formulário não cobre (NFS-e, Imposto Seletivo, compras governamentais), use a calculadora completa da Receita, na página de serviços (Swagger).</p>
+    <a class="botao" href="/api/swagger-ui.html" style="background:transparent;color:var(--destaque);border:1px solid var(--destaque)">Abrir calculadora completa</a>
+  </section>
+
+  <section class="cartao">
+    <h2>Como fazer um cálculo no modo avançado</h2>
     <ol>
       <li>Na calculadora, clique em <code>POST /calculadora/observabilidade/simples-nacional/nao-assistido</code>.</li>
       <li>Clique em <strong>Try it out</strong>. Aparece um exemplo já preenchido.</li>

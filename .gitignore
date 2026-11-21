@@ -1,0 +1,7 @@
+# Pastas e arquivos gerados localmente
+calculadora/
+target/
+*.db
+.env
+.DS_Store
+Thumbs.db
