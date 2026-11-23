@@ -1,0 +1,29 @@
+# Calculadora CBS/IBS do Simples Nacional na VPS da Hostinger (Docker Manager + Traefik).
+#
+# Antes de usar, troque SRV000000 pelo nome do seu servidor (ex.: srv123456),
+# que aparece no painel da VPS como srv123456.hstgr.cloud.
+#
+# Os usuários e senhas vão na variável USUARIOS (formato usuario:senha,usuario2:senha2).
+# Nunca salve senhas neste arquivo no GitHub: preencha-as só no Docker Manager.
+services:
+  calculadora:
+    image: ghcr.io/ddiamond-ia/calculadora-simples-nacional:latest
+    restart: unless-stopped
+    environment:
+      USUARIOS: ${USUARIOS}
+      PORT: "10000"
+      PROTOCOLO_EXTERNO: https
+    mem_limit: 1g
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-proxy
+      - traefik.http.routers.calculadora.rule=Host(`calculadora.SRV000000.hstgr.cloud`)
+      - traefik.http.routers.calculadora.entrypoints=websecure
+      - traefik.http.routers.calculadora.tls.certresolver=letsencrypt
+      - traefik.http.services.calculadora.loadbalancer.server.port=10000
+    networks:
+      - traefik-proxy
+
+networks:
+  traefik-proxy:
+    external: true
