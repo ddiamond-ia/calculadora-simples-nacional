@@ -27,6 +27,24 @@ Pessoa da empresa ──HTTPS──▶ Render ──▶ Caddy (login) ──▶ 
 
 ---
 
+## Publicar na VPS com EasyPanel (Hostinger)
+
+A cada alteração na branch `main`, o GitHub monta a imagem da calculadora e a publica em
+`ghcr.io/ddiamond-ia/calculadora-simples-nacional:latest` (veja a aba **Actions**).
+
+1. No EasyPanel, abra (ou crie) um projeto → **+ Service** → **App**, com o nome `calculadora`.
+2. **Source** → **Docker Image** → `ghcr.io/ddiamond-ia/calculadora-simples-nacional:latest` → **Save**.
+   Se a imagem estiver privada no GitHub, preencha também usuário e um token com permissão `read:packages`.
+3. **Environment**:
+   ```
+   USUARIOS=ana:SenhaForte123,joao:OutraSenha456
+   PORT=10000
+   PROTOCOLO_EXTERNO=https
+   ```
+   → **Save**.
+4. **Domains** → edite o domínio criado automaticamente e troque a porta para **10000** → **Save**.
+5. **Deploy**. Para atualizar depois de uma nova versão no GitHub, clique em **Deploy** de novo.
+
 ## Publicar no Render (passo a passo)
 
 1. Crie uma conta em <https://render.com> e entre com a sua conta do GitHub.
