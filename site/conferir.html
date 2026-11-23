@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Conferir notas – CBS/IBS Simples Nacional</title>
+<style>
+  :root {
+    --fundo: #f6f7f9; --cartao: #ffffff; --texto: #1d2733; --suave: #5b6675;
+    --borda: #e2e6eb; --destaque: #0f6e56; --destaque-claro: #e3f2ec;
+    --erro: #b3261e; --erro-claro: #fdecea; --aviso: #8a5a00; --aviso-claro: #fff6e0;
+    --campo: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #14181d; --cartao: #1c2229; --texto: #e7ebef; --suave: #9aa5b1;
+      --borda: #2c343d; --destaque: #4cc39a; --destaque-claro: #173229;
+      --erro: #f2b8b5; --erro-claro: #3b1f1e; --aviso: #f0c46b; --aviso-claro: #3a3017;
+      --campo: #14181d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+  a { color: var(--destaque); }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin: 8px 0 4px; }
+  h2 { font-size: 1.1rem; margin: 0 0 14px; }
+  .subtitulo { color: var(--suave); margin: 0 0 24px; }
+  .voltar { font-size: .9rem; text-decoration: none; }
+  .cartao { background: var(--cartao); border: 1px solid var(--borda); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+  .ajuda { display: block; font-size: .8rem; color: var(--suave); font-weight: 400; margin-top: 3px; }
+  input, select { width: 100%; font: inherit; padding: 9px 10px; border: 1px solid var(--borda);
+    border-radius: 7px; background: var(--campo); color: var(--texto); }
+  input:focus, select:focus { outline: 2px solid var(--destaque); outline-offset: 1px; border-color: transparent; }
+  .check { display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: .95rem; }
+  .check input { width: auto; }
+  .botao { display: inline-flex; align-items: center; gap: 6px; background: var(--destaque); color: #fff;
+    border: 0; border-radius: 8px; padding: 11px 20px; font: inherit; font-weight: 600; cursor: pointer; }
+  @media (prefers-color-scheme: dark) { .botao { color: #0c1a14; } }
+  .botao:hover { filter: brightness(1.08); }
+  .botao:disabled { opacity: .6; cursor: wait; }
+  .botao-sec { background: transparent; color: var(--destaque); border: 1px solid var(--destaque);
+    border-radius: 8px; padding: 8px 14px; font: inherit; font-size: .9rem; cursor: pointer; }
+  .acoes { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+  .soltar { border: 2px dashed var(--borda); border-radius: 12px; padding: 34px 20px; text-align: center; cursor: pointer; }
+  .soltar.ativo { border-color: var(--destaque); background: var(--destaque-claro); }
+  .soltar strong { color: var(--destaque); }
+  .msg { border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; font-size: .95rem; }
+  .msg-erro { background: var(--erro-claro); color: var(--erro); }
+  .msg-aviso { background: var(--aviso-claro); color: var(--aviso); }
+  .msg-ok { background: var(--destaque-claro); color: var(--destaque); }
+  .oculto { display: none !important; }
+  .numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .numero { background: var(--destaque-claro); border-radius: 10px; padding: 12px 14px; }
+  .numero .rotulo { font-size: .8rem; color: var(--suave); }
+  .numero .valor { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tabela-rolagem { overflow-x: auto; }
+  table.dados { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+  table.dados th { text-align: left; font-size: .78rem; color: var(--suave); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--borda); white-space: nowrap; }
+  table.dados td { padding: 7px 8px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+  table.dados td.n, table.dados th.n { text-align: right; white-space: nowrap; }
+  table.dados tfoot td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--borda); }
+  .nome { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .selo { font-size: .75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+  .selo-ok { background: var(--destaque-claro); color: var(--destaque); }
+  .selo-erro { background: var(--erro-claro); color: var(--erro); }
+  .selo-aviso { background: var(--aviso-claro); color: var(--aviso); }
+  .detalhe-erro { font-size: .8rem; color: var(--erro); margin-top: 3px; white-space: normal; }
+  .progresso { height: 8px; background: var(--borda); border-radius: 99px; overflow: hidden; margin-top: 12px; }
+  .progresso div { height: 100%; width: 0; background: var(--destaque); transition: width .2s; }
+  .anexo-bloco { border-top: 1px solid var(--borda); padding-top: 14px; margin-top: 14px; }
+  .anexo-bloco:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .anexo-titulo { font-weight: 600; margin-bottom: 8px; }
+  details summary { cursor: pointer; color: var(--suave); font-size: .9rem; }
+  @media print {
+    .nao-imprimir { display: none !important; }
+    body { background: #fff; color: #000; }
+    .cartao { border: 0; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="voltar nao-imprimir" href="/">← Voltar</a>
+  <h1>Conferir notas emitidas</h1>
+  <p class="subtitulo">Suba o relatório de notas do sistema (CSV) para calcular a CBS e o IBS de cada nota. Se o arquivo tiver colunas de CBS e IBS, a página também compara com o que foi destacado.</p>
+
+  <section class="cartao nao-imprimir">
+    <h2>1. Arquivo das notas</h2>
+    <div id="soltar" class="soltar" tabindex="0" role="button" aria-label="Escolher arquivo CSV">
+      <div style="font-size:2rem;line-height:1">📄</div>
+      <p style="margin:8px 0 4px"><strong>Clique para escolher</strong> ou arraste o arquivo aqui</p>
+      <span class="ajuda">Relatório de notas em CSV (separado por ponto e vírgula), como o FISR003 – Impressão de Nota Fiscal.</span>
+      <span class="ajuda">Os nomes de clientes ficam só no seu navegador: para a calculadora vão apenas valores, datas e CFOP.</span>
+    </div>
+    <input type="file" id="arquivo" accept=".csv,.txt,text/csv" class="oculto">
+    <div id="msgArquivo" style="margin-top:14px"></div>
+  </section>
+
+  <form id="config" class="oculto nao-imprimir" novalidate>
+    <section class="cartao">
+      <h2>2. Dados da empresa</h2>
+      <div class="grade">
+        <div>
+          <label for="tpDoc">Tipo de nota</label>
+          <select id="tpDoc">
+            <option value="55">NF-e (nota fiscal eletrônica)</option>
+            <option value="65">NFC-e (nota do consumidor)</option>
+          </select>
+        </div>
+        <div>
+          <label for="crt">Regime da empresa</label>
+          <select id="crt">
+            <option value="1">Simples Nacional</option>
+            <option value="2">Simples Nacional – excesso de sublimite</option>
+          </select>
+        </div>
+        <div id="blocoSimulacao" class="oculto">
+          <label for="dataSimulacao">Data de referência para a simulação</label>
+          <input type="date" id="dataSimulacao" value="2027-01-01">
+          <span class="ajuda">A CBS e o IBS do Simples começam em 2027. Notas com data anterior são calculadas como se fossem desta data.</span>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label class="check"><input type="checkbox" id="impedimento"> Empresa impedida de recolher IBS e ISS pelo Simples (excedeu o sublimite)</label>
+      </div>
+    </section>
+
+    <section class="cartao">
+      <h2>3. Atividade de cada CFOP</h2>
+      <p class="ajuda" style="margin:-6px 0 14px">Cada CFOP do arquivo precisa de uma atividade do Simples. A atividade <strong>01</strong> (revenda e venda de mercadorias industrializadas pelo próprio contribuinte) vale para a maioria das vendas.</p>
+      <div id="msgAtividades" class="msg msg-aviso oculto"></div>
+      <div class="tabela-rolagem">
+        <table class="dados">
+          <thead><tr><th>CFOP</th><th class="n">Notas</th><th class="n">Valor</th><th style="width:60%">Atividade do Simples</th></tr></thead>
+          <tbody id="cfops"></tbody>
+        </table>
+      </div>
+      <div id="blocoFatorR" class="oculto" style="margin-top:14px">
+        <label class="check"><input type="checkbox" id="fatorR"> Fator R igual ou maior que 28% (usa o Anexo III em vez do V)</label>
+      </div>
+    </section>
+
+    <section class="cartao">
+      <h2>4. Alíquotas efetivas do mês (do PGDAS)</h2>
+      <p class="ajuda" style="margin:-6px 0 14px">Informe em porcentagem (ex.: 1,1612). Todas as notas do arquivo usam as mesmas alíquotas, então suba um mês por vez.</p>
+      <div id="anexos"></div>
+    </section>
+
+    <div id="msgConfig" class="msg msg-erro oculto"></div>
+    <div class="acoes">
+      <button type="submit" class="botao" id="calcular">Calcular todas as notas</button>
+      <span id="textoProgresso" class="ajuda"></span>
+    </div>
+    <div id="barra" class="progresso oculto"><div></div></div>
+  </form>
+
+  <section id="resultado" class="cartao oculto" style="margin-top:22px">
+    <div class="acoes" style="justify-content:space-between;margin:0 0 6px">
+      <h2 style="margin:0">Resultado</h2>
+      <div class="acoes nao-imprimir" style="margin:0">
+        <label class="check oculto" id="blocoFiltro"><input type="checkbox" id="soDivergencias"> Mostrar só divergências e erros</label>
+        <button type="button" class="botao-sec" id="baixar">Baixar planilha</button>
+        <button type="button" class="botao-sec" onclick="window.print()">Imprimir</button>
+      </div>
+    </div>
+    <p class="ajuda" id="resumoResultado" style="margin:0 0 16px"></p>
+    <div id="msgResultado"></div>
+    <div class="numeros" id="numeros"></div>
+    <div class="tabela-rolagem">
+      <table class="dados">
+        <thead id="cabecalho"></thead>
+        <tbody id="linhas"></tbody>
+        <tfoot id="rodape"></tfoot>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const API = '/api/calculadora';
+  const ANEXOS_COM_ISS = ['III', 'IV', 'V'];
+  const NOMES_ANEXO = {
+    I: 'Anexo I – Comércio', II: 'Anexo II – Indústria', III: 'Anexo III – Serviços',
+    IV: 'Anexo IV – Serviços', V: 'Anexo V – Serviços'
+  };
+  const INICIO_REFORMA = '2027-01-01';
+  const SIMULTANEOS = 4;
+
+  const $ = (id) => document.getElementById(id);
+  let notas = [];          // notas válidas lidas do arquivo
+  let temComparacao = false;
+  let atividades = [];
+  let resultados = [];
+  const aliquotasDigitadas = {};
+
+  // ---------- Utilidades ----------
+  const escapar = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // Converte "1.234,56" (ou "1234.56") em centavos inteiros; null se inválido
+  function paraCentavos(texto) {
+    let t = String(texto ?? '').trim().replace(/[R$\s]/g, '');
+    if (!t) return null;
+    let neg = false;
+    if (t.startsWith('-')) { neg = true; t = t.slice(1); }
+    if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+    else if (!/^\d+\.\d{1,2}$/.test(t)) t = t.replace(/\./g, '');
+    if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
+    const [i, d = ''] = t.split('.');
+    const c = Number(i) * 100 + Number((d + '00').slice(0, 2));
+    return neg ? -c : c;
+  }
+  const centavosParaApi = (c) => `${Math.trunc(c / 100)}.${String(Math.abs(c) % 100).padStart(2, '0')}`;
+  function reais(c) {
+    if (c === null || c === undefined) return '—';
+    const neg = c < 0; const a = Math.abs(c);
+    const inteiro = String(Math.trunc(a / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return (neg ? '−' : '') + inteiro + ',' + String(a % 100).padStart(2, '0');
+  }
+  const reaisCsv = (c) => (c === null || c === undefined) ? '' : (c < 0 ? '-' : '') + Math.trunc(Math.abs(c) / 100) + ',' + String(Math.abs(c) % 100).padStart(2, '0');
+  function aliquotaParaApi(texto) {
+    const t = String(texto || '').replace(/[%\s]/g, '').replace(',', '.');
+    return /^\d{1,3}(\.\d{1,34})?$/.test(t) ? t : null;
+  }
+  const dataBr = (iso) => iso ? iso.split('-').reverse().join('/') : '';
+  function dataIso(texto) {
+    const m = String(texto || '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if (m) {
+      const ano = m[3].length === 2 ? '20' + m[3] : m[3];
+      return `${ano}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    }
+    const iso = String(texto || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return iso ? `${iso[1]}-${iso[2]}-${iso[3]}` : null;
+  }
+
+  // ---------- Leitura do arquivo ----------
+  function decodificar(buffer) {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(buffer).replace(/^﻿/, ''); }
+    catch { return new TextDecoder('windows-1252').decode(buffer); }
+  }
+  function separarCampos(linha, sep) {
+    const campos = []; let atual = ''; let aspas = false;
+    for (let i = 0; i < linha.length; i++) {
+      const ch = linha[i];
+      if (ch === '"') { if (aspas && linha[i + 1] === '"') { atual += '"'; i++; } else aspas = !aspas; }
+      else if (ch === sep && !aspas) { campos.push(atual); atual = ''; }
+      else atual += ch;
+    }
+    campos.push(atual);
+    return campos.map((c) => c.trim());
+  }
+
+  const COLUNAS = {
+    numero: /^(NR\.?\s*N\.?\s*F\.?|N[ºo°]?\s*(DA\s*)?NOTA|N[UÚ]MERO(\s*(DA\s*)?N\.?F\.?|\s*DA\s*NOTA)?|NF|NOTA)$/i,
+    serie: /^S[EÉ]RIE$/i,
+    pessoa: /REMETENTE|DESTINAT|CLIENTE|RAZ[AÃ]O/i,
+    data: /^(DT\.?\s*EMISS|DATA\s*(DE\s*)?EMISS|DATA$|EMISS[AÃ]O$)/i,
+    op: /^OP\.?(\s|\(|$)|^OPERA[CÇ][AÃ]O|ENTRADA\s*\/\s*SA[IÍ]DA/i,
+    sit: /^SIT\.?(\s|\(|$)|^SITUA[CÇ][AÃ]O/i,
+    cfop: /^CFOP$/i,
+    valor: /^(VALOR\s*TOTAL(\s*(DA\s*)?(NF|NOTA))?|VL\.?\s*TOTAL(\s*(DA\s*)?(NF|NOTA))?|TOTAL\s*(DA\s*)?(NF|NOTA))$/i,
+    cbs: /(^|\W)(VALOR|VL\.?|V)?\s*CBS(\W|$)/i,
+    ibs: /(^|\W)(VALOR|VL\.?|V)?\s*IBS(\W|$)/i
+  };
+
+  function lerRelatorio(texto) {
+    const linhas = texto.split(/\r?\n/);
+    const sep = (linhas.find((l) => l.includes(';')) ? ';' : ',');
+    let idxCab = -1; let mapa = null;
+    for (let i = 0; i < linhas.length && i < 60; i++) {
+      const cab = separarCampos(linhas[i], sep);
+      const m = {};
+      cab.forEach((nome, j) => {
+        for (const [chave, re] of Object.entries(COLUNAS)) {
+          if (m[chave] === undefined && re.test(nome)) { m[chave] = j; break; }
+        }
+      });
+      if (m.numero !== undefined && m.valor !== undefined) { idxCab = i; mapa = m; break; }
+    }
+    if (idxCab < 0) throw new Error('Não encontrei a linha de cabeçalho com as colunas do número da nota e do valor total. Confira se é o relatório de notas em CSV.');
+
+    const lidas = []; const ignoradas = { entradas: 0, canceladas: 0, invalidas: 0 };
+    for (let i = idxCab + 1; i < linhas.length; i++) {
+      const bruta = linhas[i];
+      if (!bruta.trim() || /^\s*;*\s*$/.test(bruta)) break;       // fim do bloco de notas
+      const c = separarCampos(bruta, sep);
+      const get = (k) => mapa[k] !== undefined ? (c[mapa[k]] ?? '') : '';
+      const numero = get('numero');
+      if (!/\d/.test(numero)) break;                                // linha de resumo/rodapé
+      const op = get('op').toUpperCase();
+      const sit = get('sit').toUpperCase();
+      if (op && !op.startsWith('S')) { ignoradas.entradas++; continue; }
+      if (sit.startsWith('C')) { ignoradas.canceladas++; continue; }
+      const valor = paraCentavos(get('valor'));
+      const data = dataIso(get('data'));
+      if (valor === null || !data) { ignoradas.invalidas++; continue; }
+      lidas.push({
+        numero, serie: get('serie'), pessoa: get('pessoa').replace(/\s{2,}/g, ' '),
+        data, cfop: get('cfop').replace(/\D/g, '') || '—', valor,
+        cbsNota: mapa.cbs !== undefined ? paraCentavos(get('cbs')) : null,
+        ibsNota: mapa.ibs !== undefined ? paraCentavos(get('ibs')) : null
+      });
+    }
+    return { lidas, ignoradas, comparacao: mapa.cbs !== undefined || mapa.ibs !== undefined };
+  }
+
+  async function receberArquivo(arquivo) {
+    const msg = $('msgArquivo');
+    $('resultado').classList.add('oculto');
+    try {
+      const texto = decodificar(await arquivo.arrayBuffer());
+      const { lidas, ignoradas, comparacao } = lerRelatorio(texto);
+      if (!lidas.length) throw new Error('O arquivo não tem notas de saída válidas para calcular.');
+      notas = lidas; temComparacao = comparacao;
+      const total = lidas.reduce((s, n) => s + n.valor, 0);
+      const datas = lidas.map((n) => n.data).sort();
+      const extras = [];
+      if (ignoradas.entradas) extras.push(`${ignoradas.entradas} de entrada`);
+      if (ignoradas.canceladas) extras.push(`${ignoradas.canceladas} cancelada(s)`);
+      if (ignoradas.invalidas) extras.push(`${ignoradas.invalidas} sem valor ou data válidos`);
+      msg.innerHTML = `<div class="msg msg-ok"><strong>${escapar(arquivo.name)}</strong>: ${lidas.length} nota(s) de saída, de ${dataBr(datas[0])} a ${dataBr(datas[datas.length - 1])}, somando R$ ${reais(total)}.`
+        + (extras.length ? ` Ignoradas: ${extras.join(', ')}.` : '')
+        + (comparacao ? ' O arquivo tem CBS/IBS destacados: a página vai comparar.' : ' O arquivo não tem colunas de CBS/IBS, então a página só calcula (sem comparar).')
+        + '</div>';
+      const antigas = lidas.some((n) => n.data < INICIO_REFORMA);
+      $('blocoSimulacao').classList.toggle('oculto', !antigas);
+      if (antigas) msg.innerHTML += `<div class="msg msg-aviso">Há notas anteriores a 2027, quando a CBS e o IBS do Simples ainda não existem. Elas serão calculadas como <strong>simulação</strong>, usando a data de referência do passo 2.</div>`;
+      montarCfops();
+      $('config').classList.remove('oculto');
+      await carregarAtividades();
+    } catch (e) {
+      notas = [];
+      $('config').classList.add('oculto');
+      msg.innerHTML = `<div class="msg msg-erro">${escapar(e.message || 'Não foi possível ler o arquivo.')}</div>`;
+    }
+  }
+
+  // ---------- CFOP → atividade ----------
+  function montarCfops() {
+    const grupos = {};
+    notas.forEach((n) => { (grupos[n.cfop] ||= { qtd: 0, valor: 0 }); grupos[n.cfop].qtd++; grupos[n.cfop].valor += n.valor; });
+    $('cfops').innerHTML = Object.keys(grupos).sort().map((cfop) => `
+      <tr><td><strong>${escapar(cfop)}</strong></td><td class="n">${grupos[cfop].qtd}</td><td class="n">R$ ${reais(grupos[cfop].valor)}</td>
+      <td><select class="atividade" data-cfop="${escapar(cfop)}" aria-label="Atividade do CFOP ${escapar(cfop)}"></select></td></tr>`).join('');
+    document.querySelectorAll('select.atividade').forEach((s) => s.addEventListener('change', atualizarAnexos));
+  }
+  function dataReferencia() {
+    const futuras = notas.filter((n) => n.data >= INICIO_REFORMA).map((n) => n.data).sort();
+    return futuras[0] || $('dataSimulacao').value || INICIO_REFORMA;
+  }
+  async function carregarAtividades() {
+    const aviso = $('msgAtividades'); aviso.classList.add('oculto');
+    try {
+      const r = await fetch(`${API}/simples-nacional/atividades?data=${encodeURIComponent(dataReferencia())}&tpDoc=${encodeURIComponent($('tpDoc').value)}`, { headers: { Accept: 'application/json' } });
+      if (!r.ok) throw new Error();
+      const lista = await r.json();
+      atividades = (Array.isArray(lista) ? lista : []).sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+    } catch {
+      atividades = [];
+      aviso.textContent = 'Não foi possível carregar a lista de atividades. Se a calculadora acabou de ser ligada, espere uns minutos e suba o arquivo de novo.';
+      aviso.classList.remove('oculto');
+    }
+    document.querySelectorAll('select.atividade').forEach((sel) => {
+      const atual = sel.value || '01';
+      sel.innerHTML = '<option value="">Escolha…</option>' + atividades.map((a) => {
+        const anexo = a.rotuloCurtoAnexo ? ` (Anexo ${escapar(a.rotuloCurtoAnexo)})` : '';
+        const nao = a.admissivelNoDocumento === false;
+        return `<option value="${escapar(a.codigo)}"${nao ? ' disabled' : ''}>${escapar(a.codigo)} – ${escapar(a.descricao)}${anexo}${nao ? ' – não vale para este tipo de nota' : ''}</option>`;
+      }).join('');
+      if ([...sel.options].some((o) => o.value === atual && !o.disabled)) sel.value = atual;
+    });
+    atualizarAnexos();
+  }
+  function anexoDaAtividade(codigo) {
+    const a = atividades.find((x) => x.codigo === codigo);
+    if (!a) return null;
+    if (a.sujeitaFatorR && $('fatorR').checked && a.anexoComFatorR) return a.anexoComFatorR;
+    return a.anexoSemFatorR;
+  }
+  function anexosEmUso() {
+    const usados = new Set();
+    document.querySelectorAll('select.atividade').forEach((s) => { const a = anexoDaAtividade(s.value); if (a) usados.add(a); });
+    return ['I', 'II', 'III', 'IV', 'V'].filter((a) => usados.has(a));
+  }
+  function atualizarAnexos() {
+    document.querySelectorAll('#anexos [data-anexo]').forEach((i) => { aliquotasDigitadas[i.dataset.anexo + ':' + i.dataset.campo] = i.value; });
+    const usaFatorR = [...document.querySelectorAll('select.atividade')].some((s) => { const a = atividades.find((x) => x.codigo === s.value); return a && a.sujeitaFatorR; });
+    $('blocoFatorR').classList.toggle('oculto', !usaFatorR);
+    const anexos = anexosEmUso();
+    if (!anexos.length) { $('anexos').innerHTML = '<p class="ajuda" style="margin:0">Escolha a atividade dos CFOPs para aparecerem os campos de alíquota.</p>'; return; }
+    const campo = (anexo, nome, rotulo, ajuda) => {
+      const id = `aliq-${anexo}-${nome}`;
+      return `<div><label for="${id}">${rotulo}</label><input id="${id}" data-anexo="${anexo}" data-campo="${nome}" inputmode="decimal" placeholder="0,0000" value="${escapar(aliquotasDigitadas[anexo + ':' + nome] || '')}">${ajuda ? `<span class="ajuda">${ajuda}</span>` : ''}</div>`;
+    };
+    $('anexos').innerHTML = anexos.map((anexo) => `<div class="anexo-bloco">
+        <div class="anexo-titulo">${NOMES_ANEXO[anexo] || 'Anexo ' + anexo}</div>
+        <div class="grade">${campo(anexo, 'pCBSSN', 'Alíquota efetiva CBS (%)')}${campo(anexo, 'pIBSSN', 'Alíquota efetiva IBS (%)')}</div>
+        ${ANEXOS_COM_ISS.includes(anexo) ? `<details style="margin-top:10px"><summary>Alíquotas sem redistribuição do ISS (opcional)</summary>
+          <div class="grade" style="margin-top:10px">${campo(anexo, 'semCBS', 'CBS sem redistribuição do ISS (%)', 'Se ficar em branco, a calculadora usa as de cima.')}${campo(anexo, 'semIBS', 'IBS sem redistribuição do ISS (%)')}</div></details>` : ''}
+      </div>`).join('');
+  }
+
+  // ---------- Cálculo ----------
+  function montarBase() {
+    const erros = [];
+    const mapaAtividade = {};
+    document.querySelectorAll('select.atividade').forEach((s) => {
+      if (!s.value) erros.push(`Escolha a atividade do CFOP ${s.dataset.cfop}.`);
+      mapaAtividade[s.dataset.cfop] = s.value;
+    });
+    const impedimento = $('impedimento').checked;
+    const aliquotasEfetivas = { fatorR: $('fatorR').checked, impedimentoSublimite: impedimento };
+    anexosEmUso().forEach((anexo) => {
+      const ler = (c) => ($(`aliq-${anexo}-${c}`) || {}).value || '';
+      const cbs = aliquotaParaApi(ler('pCBSSN'));
+      const ibsTxt = ler('pIBSSN'); const ibs = aliquotaParaApi(ibsTxt);
+      if (!cbs) erros.push(`${NOMES_ANEXO[anexo]}: informe a alíquota efetiva de CBS (ex.: 1,1612).`);
+      if (!ibs && !(impedimento && !ibsTxt.trim())) erros.push(`${NOMES_ANEXO[anexo]}: informe a alíquota efetiva de IBS (ex.: 0,0129).`);
+      const par = { pCBSSN: cbs }; if (ibs) par.pIBSSN = ibs;
+      if (ANEXOS_COM_ISS.includes(anexo)) {
+        const sc = aliquotaParaApi(ler('semCBS')); const si = aliquotaParaApi(ler('semIBS'));
+        if (sc || si) { if (!sc) erros.push(`${NOMES_ANEXO[anexo]}: preencha também a CBS sem redistribuição do ISS.`); par.semRedistribuicaoISS = { pCBSSN: sc }; if (si) par.semRedistribuicaoISS.pIBSSN = si; }
+      }
+      aliquotasEfetivas['anexo' + anexo] = par;
+    });
+    const simulacao = $('dataSimulacao').value || INICIO_REFORMA;
+    if (notas.some((n) => n.data < INICIO_REFORMA) && simulacao < INICIO_REFORMA) erros.push('A data de referência da simulação precisa ser de 2027 em diante.');
+    return { erros, mapaAtividade, aliquotasEfetivas, simulacao };
+  }
+
+  async function calcularNota(nota, base) {
+    const simulada = nota.data < INICIO_REFORMA;
+    const pedido = {
+      id: `nf-${nota.numero}-${nota.serie || '0'}`, versao: '3.0.0',
+      data: simulada ? base.simulacao : nota.data,
+      tpDoc: $('tpDoc').value, CRT: $('crt').value,
+      aliquotasEfetivas: base.aliquotasEfetivas,
+      itens: [{ numero: 1, cAtivSN: base.mapaAtividade[nota.cfop], cClassTrib: '000001', baseCalculo: centavosParaApi(nota.valor), valorImpostoSeletivo: '0.00' }]
+    };
+    const r = { nota, simulada, estado: 'FALHA', cbs: null, ibs: null, total: null, erros: [] };
+    for (let tentativa = 0; tentativa < 3; tentativa++) {
+      try {
+        const resp = await fetch(`${API}/observabilidade/simples-nacional/nao-assistido`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(pedido)
+        });
+        if (resp.status === 502 || resp.status === 503 || resp.status === 429) { await new Promise((ok) => setTimeout(ok, 2000 * (tentativa + 1))); continue; }
+        const corpo = await resp.json().catch(() => ({}));
+        const obj = (corpo.objetos || [])[0];
+        const errosGerais = (corpo.erros || []).map((e) => e.detail || e.title || e.code);
+        if (!obj) { r.erros = errosGerais.length ? errosGerais : [corpo.detail || corpo.title || `A calculadora respondeu com erro (HTTP ${resp.status}).`]; return r; }
+        r.estado = obj.estadoItem;
+        r.erros = errosGerais.concat((obj.erros || []).map((e) => e.detail || e.title || e.code));
+        if (obj.tribCalc) {
+          r.cbs = paraCentavos(obj.tribCalc.vCBSSN); r.ibs = paraCentavos(obj.tribCalc.vIBSSN); r.total = paraCentavos(obj.tribCalc.totalItem);
+        }
+        return r;
+      } catch { await new Promise((ok) => setTimeout(ok, 1500)); }
+    }
+    r.erros = ['Não foi possível falar com a calculadora. Tente de novo em alguns minutos.'];
+    return r;
+  }
+
+  async function calcularTodas(ev) {
+    ev.preventDefault();
+    const msg = $('msgConfig'); msg.classList.add('oculto');
+    const base = montarBase();
+    if (base.erros.length) {
+      msg.innerHTML = '<strong>Confira antes de calcular:</strong><ul style="margin:6px 0 0 18px;padding:0">' + base.erros.map((e) => `<li>${escapar(e)}</li>`).join('') + '</ul>';
+      msg.classList.remove('oculto'); return;
+    }
+    const botao = $('calcular'); botao.disabled = true;
+    const barra = $('barra'); barra.classList.remove('oculto');
+    resultados = new Array(notas.length); let feitas = 0; let proxima = 0;
+    const atualizar = () => { barra.firstElementChild.style.width = `${Math.round(100 * feitas / notas.length)}%`; $('textoProgresso').textContent = `Calculando ${feitas} de ${notas.length}…`; };
+    atualizar();
+    const trabalhador = async () => {
+      while (proxima < notas.length) { const i = proxima++; resultados[i] = await calcularNota(notas[i], base); feitas++; atualizar(); }
+    };
+    await Promise.all(Array.from({ length: Math.min(SIMULTANEOS, notas.length) }, trabalhador));
+    botao.disabled = false; $('textoProgresso').textContent = ''; barra.classList.add('oculto');
+    mostrarResultado(base);
+  }
+
+  // ---------- Resultado ----------
+  const ok = (r) => r.estado === 'CALCULADO' || r.estado === 'CALCULO_SIMULADO';
+  function divergente(r) {
+    if (!temComparacao || !ok(r)) return false;
+    return (r.nota.cbsNota !== null && r.nota.cbsNota !== r.cbs) || (r.nota.ibsNota !== null && r.nota.ibsNota !== r.ibs);
+  }
+  function situacao(r) {
+    if (!ok(r)) return ['Erro', 'selo-erro'];
+    if (divergente(r)) return ['Divergente', 'selo-aviso'];
+    if (temComparacao) return ['Confere', 'selo-ok'];
+    return [r.simulada ? 'Simulado' : 'Calculado', 'selo-ok'];
+  }
+
+  function mostrarResultado(base) {
+    $('resultado').classList.remove('oculto');
+    const soma = (f) => resultados.reduce((s, r) => s + (f(r) ?? 0), 0);
+    const calculadas = resultados.filter(ok);
+    const erros = resultados.length - calculadas.length;
+    const divergentes = resultados.filter(divergente).length;
+    const simuladas = resultados.some((r) => r.simulada);
+
+    $('resumoResultado').textContent = `${resultados.length} nota(s) · ${$('tpDoc').value === '65' ? 'NFC-e' : 'NF-e'}`
+      + (simuladas ? ` · notas anteriores a 2027 simuladas com a data ${dataBr(base.simulacao)}` : '');
+    const msgs = [];
+    if (erros) msgs.push(`<div class="msg msg-erro">${erros} nota(s) não puderam ser calculadas. Veja o motivo na coluna Situação.</div>`);
+    if (temComparacao && divergentes) msgs.push(`<div class="msg msg-aviso">${divergentes} nota(s) com CBS ou IBS diferente do calculado.</div>`);
+    if (temComparacao && !divergentes && !erros) msgs.push('<div class="msg msg-ok">Todas as notas conferem com o cálculo.</div>');
+    $('msgResultado').innerHTML = msgs.join('');
+
+    $('numeros').innerHTML = `
+      <div class="numero"><div class="rotulo">Valor das notas</div><div class="valor">R$ ${reais(soma((r) => r.nota.valor))}</div></div>
+      <div class="numero"><div class="rotulo">CBS calculada</div><div class="valor">R$ ${reais(soma((r) => r.cbs))}</div></div>
+      <div class="numero"><div class="rotulo">IBS calculado</div><div class="valor">R$ ${reais(soma((r) => r.ibs))}</div></div>
+      <div class="numero"><div class="rotulo">Total de tributos</div><div class="valor">R$ ${reais(soma((r) => r.total))}</div></div>`;
+
+    $('blocoFiltro').classList.toggle('oculto', !temComparacao && !erros);
+    $('cabecalho').innerHTML = `<tr><th>Nota</th><th>Série</th><th>Emissão</th><th>Destinatário</th><th>CFOP</th><th class="n">Valor</th>
+      <th class="n">CBS calc.</th><th class="n">IBS calc.</th><th class="n">Total calc.</th>
+      ${temComparacao ? '<th class="n">CBS na nota</th><th class="n">IBS na nota</th><th class="n">Diferença</th>' : ''}<th>Situação</th></tr>`;
+    desenharLinhas();
+    $('rodape').innerHTML = `<tr><td colspan="5">Total</td><td class="n">${reais(soma((r) => r.nota.valor))}</td><td class="n">${reais(soma((r) => r.cbs))}</td><td class="n">${reais(soma((r) => r.ibs))}</td><td class="n">${reais(soma((r) => r.total))}</td>
+      ${temComparacao ? `<td class="n">${reais(soma((r) => r.nota.cbsNota))}</td><td class="n">${reais(soma((r) => r.nota.ibsNota))}</td><td class="n">${reais(soma((r) => diferenca(r)))}</td>` : ''}<td></td></tr>`;
+    $('resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function diferenca(r) {
+    if (!temComparacao || !ok(r)) return null;
+    return ((r.nota.cbsNota ?? r.cbs) - r.cbs) + ((r.nota.ibsNota ?? r.ibs) - r.ibs);
+  }
+  function desenharLinhas() {
+    const filtro = $('soDivergencias').checked;
+    $('linhas').innerHTML = resultados.filter((r) => !filtro || !ok(r) || divergente(r)).map((r) => {
+      const [rot, cls] = situacao(r); const n = r.nota;
+      return `<tr>
+        <td><strong>${escapar(n.numero)}</strong></td><td>${escapar(n.serie)}</td><td>${dataBr(n.data)}</td>
+        <td class="nome" title="${escapar(n.pessoa)}">${escapar(n.pessoa)}</td><td>${escapar(n.cfop)}</td>
+        <td class="n">${reais(n.valor)}</td><td class="n">${reais(r.cbs)}</td><td class="n">${reais(r.ibs)}</td><td class="n">${reais(r.total)}</td>
+        ${temComparacao ? `<td class="n">${reais(n.cbsNota)}</td><td class="n">${reais(n.ibsNota)}</td><td class="n">${reais(diferenca(r))}</td>` : ''}
+        <td><span class="selo ${cls}">${rot}</span>${r.erros.length ? `<div class="detalhe-erro">${r.erros.map(escapar).join('<br>')}</div>` : ''}</td></tr>`;
+    }).join('');
+  }
+
+  function baixar() {
+    const cab = ['Nota', 'Série', 'Emissão', 'Destinatário', 'CFOP', 'Valor', 'CBS calculada', 'IBS calculado', 'Total calculado'];
+    if (temComparacao) cab.push('CBS na nota', 'IBS na nota', 'Diferença');
+    cab.push('Situação', 'Observação');
+    const csvCampo = (v) => { const s = String(v ?? ''); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const linhas = resultados.map((r) => {
+      const n = r.nota;
+      const l = [n.numero, n.serie, dataBr(n.data), n.pessoa, n.cfop, reaisCsv(n.valor), reaisCsv(r.cbs), reaisCsv(r.ibs), reaisCsv(r.total)];
+      if (temComparacao) l.push(reaisCsv(n.cbsNota), reaisCsv(n.ibsNota), reaisCsv(diferenca(r)));
+      l.push(situacao(r)[0], r.erros.join(' | '));
+      return l.map(csvCampo).join(';');
+    });
+    const conteudo = '﻿' + [cab.join(';')].concat(linhas).join('\r\n');
+    const url = URL.createObjectURL(new Blob([conteudo], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `conferencia-cbs-ibs-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // ---------- Eventos ----------
+  const area = $('soltar');
+  area.addEventListener('click', () => $('arquivo').click());
+  area.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('arquivo').click(); } });
+  area.addEventListener('dragover', (e) => { e.preventDefault(); area.classList.add('ativo'); });
+  area.addEventListener('dragleave', () => area.classList.remove('ativo'));
+  area.addEventListener('drop', (e) => { e.preventDefault(); area.classList.remove('ativo'); if (e.dataTransfer.files[0]) receberArquivo(e.dataTransfer.files[0]); });
+  $('arquivo').addEventListener('change', (e) => { if (e.target.files[0]) receberArquivo(e.target.files[0]); e.target.value = ''; });
+  $('tpDoc').addEventListener('change', carregarAtividades);
+  $('dataSimulacao').addEventListener('change', carregarAtividades);
+  $('fatorR').addEventListener('change', atualizarAnexos);
+  $('config').addEventListener('submit', calcularTodas);
+  $('soDivergencias').addEventListener('change', desenharLinhas);
+  $('baixar').addEventListener('click', baixar);
+})();
+</script>
+</body>
+</html>

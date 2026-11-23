@@ -18,7 +18,7 @@
 		}
 
 		# Página inicial da empresa.
-		@inicio path / /index.html /calcular.html
+		@inicio path / /index.html /calcular.html /conferir.html
 		handle @inicio {
 			root * /srv/site
 			file_server
